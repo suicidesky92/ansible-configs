@@ -1,0 +1,23 @@
+---
+- hosts: web
+  roles:
+    - geerlingguy.nginx
+    - geerlingguy.php-versions
+    - geerlingguy.php
+  tasks:  
+    - name: limit ssh port
+      ufw:
+        rule: limit
+        port: 22
+    - name: open services ports
+      ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      with_items:
+        - 80
+        - 443
+    - name: enable ufw
+      ufw:
+        state: enabled
+        policy: deny

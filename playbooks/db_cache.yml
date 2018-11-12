@@ -1,0 +1,22 @@
+---
+- hosts: web
+  roles:
+    - geerlingguy.mysql
+    - geerlingguy.redis
+  tasks:
+    - name: limit ssh port
+      ufw:
+        rule: limit
+        port: 22
+    - name: open services ports
+      ufw:
+        rule: allow
+        src: 10.0.0.0/8
+        port: "{{ item }}"
+      with_items:
+        - 3306
+        - 6379
+    - name: enable ufw
+      ufw:
+        state: enabled
+        policy: deny

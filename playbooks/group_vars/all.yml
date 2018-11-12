@@ -1,0 +1,10 @@
+domain: www.example.com
+
+magento_repo_public_key: test99test99test99
+magento_repo_private_key: test99test99test99
+
+database_server_ip: 127.0.0.1
+redis_server_ip: 127.0.0.1
+database_user: dev
+database_name: dev
+database_password: Password123

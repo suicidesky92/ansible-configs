@@ -1,0 +1,47 @@
+---
+- hosts: web
+  tasks:
+    - name: Add group
+      group:
+        name: developers
+
+        state: present
+
+#add users in groups
+    - name: Add admin
+      user:
+        name: "{{ item }}"
+        shell: /bin/bash
+        groups: sudo
+        append: yes
+      with_items:
+        - suicidesky92
+
+#keys in authorized_key
+    - name: Add SSH keys
+      authorized_key:
+        user: "{{ item }}"
+        key: '{{ lookup("file", "../keys/{{ item }}.pub") }}'
+      with_items:
+        - suicidesky92
+
+#Acl rules for users
+#    - name: Acl developers
+#      command:
+#            setfacl -Rdm g:developers:rwx /var/www/
+#    - name: Acl again
+#      command:
+#            setfacl -Rm g:developers:rwx /var/www/
+
+#    - name: Acl www-data
+#      command:
+#            setfacl -Rdm g:www-data:rwx /var/www/
+#    - name: Acl again
+#      command:
+#            setfacl -Rm g:www-data:rwx /var/www/
+
+
+          #
+          #
+          #
+          #ansible-playbook playbooks/*.yml -i hosts.txt -u root -K -s

@@ -1,0 +1,67 @@
+---
+- hosts: web
+  roles:
+    - geerlingguy.composer
+  tasks:
+    - name: Composer creds
+      command: composer global config http-basic.repo.magento.com {{ magento_repo_public_key }} {{ magento_repo_private_key }}
+      become: yes
+      become_user: www-data
+    - name: Create site dir
+      file:
+        path: /var/www/{{ domain }}
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: 0755
+    - name: Download Magento.
+      command: composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=2.2.6 .
+      become: yes
+      become_user: www-data
+      args:
+        chdir: /var/www/{{ domain }}
+    - name: Install Magento
+      command: |
+        php bin/magento setup:install \
+        --backend-frontname=admin \
+        --db-host={{ database_server_ip }}:3306 \
+        --db-name={{ database_name }} \
+        --db-user={{ database_user }} \
+        --db-password={{ database_password }} \
+        --db-engine=innodb \
+        --db-init-statements='SET NAMES utf8' \
+        --session-save=redis \
+        --session-save-redis-host={{ redis_server_ip }} \
+        --session-save-redis-port=6379 \
+        --session-save-redis-timeout=2.5 \
+        --session-save-redis-db=2 \
+        --session-save-redis-compression-threshold=2048 \
+        --session-save-redis-compression-lib=gzip \
+        --session-save-redis-log-level=1 \
+        --session-save-redis-max-concurrency=6 \
+        --session-save-redis-break-after-frontend=5 \
+        --session-save-redis-break-after-adminhtml=30 \
+        --session-save-redis-first-lifetime=600 \
+        --session-save-redis-bot-first-lifetime=60 \
+        --session-save-redis-bot-lifetime=7200 \
+        --session-save-redis-disable-locking=0 \
+        --session-save-redis-min-lifetime=60 \
+        --session-save-redis-max-lifetime=2592000 \
+        --cache-backend=Cm_Cache_Backend_Redis \
+        --cache-backend-redis-server={{ redis_server_ip }} \
+        --cache-backend-redis-db=0 \
+        --cache-backend-redis-port=6379 \
+        --base-url=http://{{ domain }} \
+        --language=en_US \
+        --currency=USD
+        --use-rewrites=1 \
+        --admin-firstname=Magento \
+        --admin-lastname=User \
+        --admin-email=example@example.com \
+        --admin-user=admin \
+        --admin-password=p3R2LX5HbI \
+        --use-rewrites=1
+      become: yes
+      become_user: www-data
+      args:
+        chdir: /var/www/{{ domain }}

@@ -1,0 +1,79 @@
+php_version: '7.1'
+
+php_packages:
+  - php{{ php_version }}-cli
+  - php{{ php_version }}-fpm
+  - php{{ php_version }}-curl
+  - php{{ php_version }}-mcrypt
+  - php{{ php_version }}-dom
+  - php{{ php_version }}-gd
+  - php{{ php_version }}-intl
+  - php{{ php_version }}-mbstring
+  - php{{ php_version }}-mysql
+  - php{{ php_version }}-soap
+  - php{{ php_version }}-zip
+  - php{{ php_version }}-opcache
+  - php{{ php_version }}-apcu
+  - php{{ php_version }}-xdebug
+  - php{{ php_version }}-bcmath
+  - php{{ php_version }}-zip
+
+php_install_recommends: no
+php_webserver_daemon: "nginx"
+
+php_memory_limit: "2048M"
+php_max_execution_time: "1800"
+php_upload_max_filesize: "64M"
+
+php_enable_php_fpm: true
+php_fpm_listen: "/run/php/php{{ php_version }}-fpm.sock"
+php_fpm_listen_allowed_clients: "127.0.0.1"
+php_fpm_pm_max_children: 100
+php_fpm_pm_start_servers: 30
+php_fpm_pm_min_spare_servers: 30
+php_fpm_pm_max_spare_servers: 50
+
+nginx_server_tokens: "off"
+nginx_multi_accept: "on"
+nginx_remove_default_vhost: true
+nginx_conf_template: "templates/nginx.conf.j2"
+
+nginx_upstreams:
+  - name: fastcgi_backend
+    servers:
+      - "unix:/run/php/php{{ php_version }}-fpm.sock"
+
+nginx_vhosts:
+  - listen: "80"
+    server_name: "{{ domain }}"
+    index: "index.php index.html index.htm"
+    filename: "80_{{ domain }}.conf"
+    state: "present"
+    extra_parameters: |
+      set $MAGE_ROOT /var/www/{{ domain }};
+      include /var/www/{{ domain }}/nginx.conf.sample;
+  - listen: "443"
+    server_name: "{{ domain }}"
+    index: "index.php index.html index.htm"
+    filename: "443_{{ domain }}.conf"
+    state: "present"
+    extra_parameters: |
+      set $MAGE_ROOT /var/www/{{ domain }};
+      include /var/www/{{ domain }}/nginx.conf.sample;
+
+
+
+mysql_innodb_buffer_pool_size: "{{ (ansible_memtotal_mb * 0.8) | int }}M"
+
+mysql_root_password: 'Password123'
+
+mysql_databases:
+  - name: "{{ database_user }}"
+
+mysql_users:
+  - name: "{{ database_name }}"
+    host: '%'
+    password: "{{ database_password }}"
+    priv: 'dev.*:all'
+
+redis_bind_interface: 0.0.0.0

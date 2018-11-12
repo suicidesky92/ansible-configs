@@ -1,0 +1,14 @@
+[Holymesh]
+
+prod_web  ansible_host=10.0.0.2
+prod_varnish_redis ansible_host=10.0.0.3
+prod_dev_db ansible_host=10.0.0.4
+web_dev ansible_host=10.0.0.5
+
+
+[Holymesh:vars]
+
+ansible_ssh_private_key_file=/home/suicidesky92/.ssh/suicidesky92.pem
+
+[web]
+10.0.0.6 ansible_ssh_private_key_file=/home/akhalitov/.ssh/suicidesky92.pem
